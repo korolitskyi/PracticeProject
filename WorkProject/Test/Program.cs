@@ -10,9 +10,31 @@ namespace Test
     {
         private static void Main(string[] args)
         {
+            var points = new[,]
+            {
+                //{20.9655, 58.4901  },
+                //{21.7087, 69.5809  },
+                //{22.0723, 67.222  },
+                //{22.3847, 77.83952 },
+                //{22.641 , 78.66343 },
+                //{23.1175, 99.37954 }
+                {41, 57},
+                {41.9, 66},
+                {42.5, 76},
+                {45.7, 92},
+                {47.2, 88},
+                {48, 79}
+            };
+
+            //var a = points[0, 1] / Math.Exp(-Math.Pow(points[0, 0] - start[1], 2) / (2 * Math.Pow(start[2], 2));
+            //var b = 
+
+            var start = new double[] { 2.5, .3, 2.5 };
+
+
             //var start = new[] { 6, .3 };
 
-            //var xy = new[,]
+            //var points = new[,]
             //{
             //    {1, 8.3  }, //1815
             //    {2, 11.0 }, //1825
@@ -24,73 +46,80 @@ namespace Test
             //    {8, 55.9 }  //1885
             //};
 
-            var start = new[] { 2.5, .25 };
+            //var start = new[] { 2.5, .25 };
 
-            var points = new[,]
-            {
-                {1, 3.2939 },
-                {2, 4.2699 },
-                {4, 7.1749 },
-                {5, 9.3008 },
-                {8, 20.259 }
-            };
+            //var points = new[,]
+            //{
+            //    {1, 3.2939 },
+            //    {2, 4.2699 },
+            //    {4, 7.1749 },
+            //    {5, 9.3008 },
+            //    {8, 20.259 }
+            //};
 
 
-            for (var z = 0; z < 1; z++)
+            for (var z = 0; z < 10; z++)
             {
 
                 var J = new double[points.GetLength(0), start.Length];
                 var df = new double[start.Length];
                 var dF = new double[start.Length, start.Length];
-                var p = new double[start.Length];
 
 
                 for (var j = 0; j < points.GetLength(0); j++)
                 {
-                    J[j, 0] = Math.Exp(start[1] * points[j, 0]);
-                    J[j, 1] = points[j, 0] * start[0] * Math.Exp(start[1] * points[j, 0]);
+                    //    J[j, 0] = Math.Exp(start[1] * points[j, 0]);
+                    //    J[j, 1] = points[j, 0] * start[0] * Math.Exp(start[1] * points[j, 0]);
+                    J[j, 0] = Math.Exp(-Math.Pow(points[j, 0] - start[1], 2) / (2 * Math.Pow(start[2], 2)));
+                    J[j, 1] = start[0] * (points[j, 0] - start[1]) * Math.Exp(-Math.Pow(points[j, 0] - start[1], 2) / (2 * Math.Pow(start[2], 2))) / Math.Pow(start[2], 2);
+                    J[j, 2] = start[0] * Math.Pow(points[j, 0] - start[1], 2) * Math.Exp(-Math.Pow(points[j, 0] - start[1], 2) / (2 * Math.Pow(start[2], 2))) / Math.Pow(start[2], 3);
                 }
 
+
+                //r * J
                 for (var i = 0; i < start.Length; i++)
                 {
                     for (var j = 0; j < points.GetLength(0); j++)
                     {
-                        df[i] += (start[0] * Math.Exp(start[1] * points[j, 0]) - points[j, 1]) * J[j, i];  //r * J
+                        //df[i] += (start[0] * Math.Exp(start[1] * points[j, 0]) - points[j, 1]) * J[j, i];
+                        df[i] += (start[0] * Math.Exp(-Math.Pow(points[j, 0] - start[1], 2) / (2 * Math.Pow(start[2], 2))) - points[j, 1]) * J[j, i];
                     }
                 }
 
-
-                for (var i = 0; i < points.GetLength(0); i++)
+                //J*Jt
+                for (var i = 0; i < start.Length; i++)
                 {
-                    dF[0, 0] += J[i, 0] * J[i, 0];
-                    dF[0, 1] += J[i, 1] * J[i, 0];
-                    dF[1, 0] += J[i, 0] * J[i, 1];
-                    dF[1, 1] += J[i, 1] * J[i, 1];
-                }
-
-
-                var D = dF[0, 0] * dF[1, 1] - dF[1, 0] * dF[0, 1];
-
-                for (var i = 0; i < 2; i++)
-                {
-                    for (var j = 0; j < 2; j++)
+                    for (var j = 0; j < start.Length; j++)
                     {
-                        dF[i, j] = dF[i, j] / D;
+                        for (var k = 0; k < points.GetLength(0); k++)
+                        {
+                            dF[i, j] += J[k, i] * J[k, j];
+                        }
                     }
                 }
 
-                var tmp = dF[1, 1];
-                dF[1, 1] = dF[0, 0];
-                dF[0, 0] = tmp;
-                dF[0, 1] = -dF[0, 1];
-                dF[1, 0] = -dF[1, 0];
+
+                var ndF = Inverse(dF);
+
+                var ndf = new double[1, df.Length];
+                for (var i = 0; i < df.Length; i++)
+                    ndf[0, i] = df[i];
 
 
-                p[0] = -(df[0] * dF[0, 0] + df[1] * dF[0, 1]);
-                p[1] = -(df[0] * dF[1, 0] + df[1] * dF[1, 1]);
 
-                start[0] += p[0];
-                start[1] += p[1];
+                var p = MultiplyTwoMatrices(ndf, ndF);
+
+                for (var i = 0; i < p.GetLength(0); i++)
+                {
+                    for (var j = 0; j < p.GetLength(1); j++)
+                    {
+                        p[i, j] = p[i, j] * -1;
+                    }
+                }
+
+                start[0] += p[0, 0];
+                start[1] += p[0, 1];
+                start[2] += p[0, 2];
 
 
                 //Console.WriteLine("r:");
@@ -109,12 +138,168 @@ namespace Test
 
                 //Console.WriteLine($"\nDf -1:\n{dF[0, 0]} {dF[0, 1]} \n{dF[1, 0]} {dF[1, 1]}");
 
-                Console.WriteLine($"\np:\n{p[0]} \n{p[1]}");
+                Console.WriteLine($"\np:\n{p[0, 0]} \n{p[0, 1]} \n{p[0, 2]}");
             }
 
-            Console.WriteLine($"\nx1: {start[0]}, x2: {start[1]}");
+            Console.WriteLine($"\nx1: {start[0]}, x2: {start[1]}, x3: {start[2]}");
 
             Console.ReadKey();
+        }
+
+        static double[,] MultiplyTwoMatrices(double[,] left, double[,] right)
+        {
+            //test
+            //var test1 = new double[,]
+            //{
+            //    {1, 2, 3},
+            //    {1, 3, 2}
+            //};
+
+            //var test2 = new double[,]
+            //{
+            //    {1, 2},
+            //    {1, 3},
+            //    {1, 2}
+            //};
+
+            //var res = MultiplyTwoMatrices(test1, test2);
+
+
+
+
+            var elements = new double[left.GetLength(0), right.GetLength(1)];
+
+            for (var i = 0; i < left.GetLength(0); i++)
+            {
+                for (var j = 0; j < right.GetLength(1); j++)
+                {
+                    elements[i, j] = ComputeOneElementForMatrixProduct(left, right, i, j);
+                }
+            }
+
+            return elements;
+        }
+
+        static double ComputeOneElementForMatrixProduct(double[,] left, double[,] right, int i, int j)
+        {
+            var element = left[i, 0] * right[0, j];
+
+            for (var index = 1; index < left.GetLength(1); index++)
+            {
+                element += left[i, index] * right[index, j];
+            }
+
+            return element;
+        }
+
+        static double[,] Inverse(double[,] mA, uint round = 0)
+        {
+            //var test = new double[,]
+            //{
+            //    {1, 2, 3},
+            //    {1, 3, 2},
+            //    {1, 2, 2}
+            //};
+
+            //var t = Inverse(test);
+            //for (int i = 0; i < t.GetLength(0); i++)
+            //    Console.WriteLine($"{t[i, 0]} {t[i, 1]} {t[i, 2]}");
+
+            if (mA.GetLength(0) != mA.GetLength(1)) throw new ArgumentException("Обратная матрица существует только для квадратных, невырожденных, матриц.");
+
+            var matrix = mA.Clone() as double[,]; //Делаем копию исходной матрицы
+            var determinant = Determinant(mA); //Находим детерминант
+
+            if (determinant == 0) return matrix; //Если определитель == 0 - матрица вырожденная
+
+            for (int i = 0; i < mA.GetLength(0); i++)
+            {
+                for (int t = 0; t < mA.GetLength(0); t++)
+                {
+                    var tmp = mA.Exclude(i, t);  //получаем матрицу без строки i и столбца t
+                    //(1 / determinant) * Determinant(tmp) - формула поределения элемента обратной матрицы
+                    matrix[t, i] = round == 0 ? (1 / determinant) * Math.Pow(-1, i + t + 2) * Determinant(tmp) : Math.Round(((1 / determinant) * Determinant(tmp)), (int)round, MidpointRounding.ToEven);
+                }
+            }
+            return matrix;
+        }
+
+        static double[,] Exclude(this double[,] value, int row, int column)
+        {
+            //var tmp = value.Clone() as double[,];
+            var result = new double[value.GetLength(0) - 1, value.GetLength(1) - 1];
+
+            for (int i = 0, j = 0; i < value.GetLength(0); i++)
+            {
+                if (i == row)
+                    continue;
+
+                for (int k = 0, u = 0; k < value.GetLength(1); k++)
+                {
+                    if (k == column)
+                        continue;
+
+                    result[j, u] = value[i, k];
+                    u++;
+                }
+                j++;
+            }
+            return result;
+        }
+
+        static double Determinant(double[,] matrix)
+        {
+            double det = 1;
+            //определяем переменную EPS
+            const double EPS = 1E-9;
+
+            var n = matrix.GetLength(0);
+            //определяем массив размером nxn
+            var a = new double[n][];
+
+            for (var i = 0; i < n; i++)
+            {
+                a[i] = new double[n];
+                for (var j = 0; j < n; j++)
+                    a[i][j] = matrix[i, j];
+            }
+            //проходим по строкам
+            for (var i = 0; i < n; ++i)
+            {
+                //присваиваем k номер строки
+                var k = i;
+                //идем по строке от i+1 до конца
+                for (var j = i + 1; j < n; ++j)
+                    //проверяем если равенство выполняется то k присваиваем j
+                    if (Math.Abs(a[j][i]) > Math.Abs(a[k][i]))
+                        k = j;
+                //если равенство выполняется то определитель приравниваем 0 и выходим из программы
+                if (Math.Abs(a[k][i]) < EPS)
+                {
+                    det = 0;
+                    break;
+                }
+                //меняем местами a[i] и a[k]
+                var tmp = a[i];
+                a[i] = a[k];
+                a[k] = tmp;
+                //если i не равно k то меняем знак определителя
+                if (i != k)
+                    det = -det;
+                //умножаем det на элемент a[i][i]
+                det *= a[i][i];
+                //идем по строке от i+1 до конца каждый элемент делим на a[i][i]
+                for (var j = i + 1; j < n; ++j)
+                    a[i][j] /= a[i][i];
+                //идем по столбцам
+                for (int j = 0; j < n; ++j)
+                    //проверяем
+                    if ((j != i) && (Math.Abs(a[j][i]) > EPS))
+                        //если да, то идем по k от i+1
+                        for (k = i + 1; k < n; ++k)
+                            a[j][k] -= a[i][k] * a[j][i];
+            }
+            return det;
         }
 
         static void GaussNewton()
