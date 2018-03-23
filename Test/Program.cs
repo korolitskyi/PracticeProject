@@ -12,7 +12,7 @@ namespace Test
             //NelderMead();
             //GaussNewton();
 
-
+            Polyfit();
             Console.ReadKey();
         }
 
@@ -39,6 +39,10 @@ namespace Test
             }
             return result;
         }
+
+
+
+        #region Aproximation
 
         #region GaussNewton
         static double[,] MultiplyTwoMatrices(double[,] left, double[,] right)
@@ -494,7 +498,7 @@ namespace Test
                 };
             }
 
-            var centroid =  x0.Arr.Clone() as double[];
+            var centroid = x0.Arr.Clone() as double[];
             var reflected = new Simplex(x0);
             var contracted = new Simplex(x0);
             var expanded = new Simplex(x0);
@@ -604,6 +608,187 @@ namespace Test
             simplex = simplex.OrderBy(e => e.fx).ToArray();
             return simplex[0].Arr;
         }
+
+        #endregion
+
+        #region Polyfit
+
+        static void Polyfit()
+        {
+            var xyTable = new double[,]
+            {
+                {
+                    20.376892592592615,
+                    21.216142592592618,
+                    22.0306277777778  ,
+                    22.46246111111114 ,
+                    22.955214814814845,
+                    26.177565000000033
+                },
+                {
+                    54.066358381111115,
+                    59.87885624222221 ,
+                    76.08806619444445 ,
+                    74.76840910592594 ,
+                    78.2198343725926  ,
+                    96.16413338616665
+                }
+                //{
+                //    20.736 ,
+                //    21.4792,
+                //    21.8428,
+                //    22.1552,
+                //    22.4115,
+                //    22.888
+
+                //},
+                //{
+                //    58.4901,
+                //    69.5809,
+                //    67.222 ,
+                //    77.8395,
+                //    78.6634,
+                //    99.3795
+                //}
+            };
+
+            for (var i = 0; i < xyTable.GetLength(1); i++)
+            {
+                xyTable[1, i] = Math.Log(xyTable[1, i]);
+            }
+
+            const int basis = 3; // power + 1
+            var matrix = MakeSystem(xyTable, basis);
+
+            for (int i = 0; i < basis; i++)
+            {
+                for (int j = 0; j < basis; j++)
+                {
+                    Console.Write(((matrix[i, j] > 0) ? "+" : "") +
+                        Math.Round(matrix[i, j], 3) + "*c" + j + " ");
+                }
+
+                Console.Write(" = " + matrix[i, basis] + "\n");
+            }
+
+            var result = Gauss(matrix, basis, basis + 1);
+            if (result == null)
+            {
+                Console.Write("Невозможно найти частное решение составленной системы уравнений\n");
+                return;
+            }
+
+            Console.Write("\nResult:\n");
+            for (var i = 0; i < basis; i++)
+            {
+                Console.Write("C" + i + " = " + result[i] + "\n");
+            }
+
+            var sigma = Math.Sqrt(-1 / (2 * result[2]));
+            var mu = result[1] * Math.Pow(sigma, 2);
+            var A = Math.Exp(result[0] + Math.Pow(mu, 2) / (2 * Math.Pow(sigma, 2)));
+
+            Console.WriteLine($"\nsigma = {sigma}");
+            Console.WriteLine($"\nmu = {mu}");
+            Console.WriteLine($"\nA = {A}");
+
+        }
+
+        private static double[,] MakeSystem(double[,] xyTable, int basis)
+        {
+            var matrix = new double[basis, basis + 1];
+            for (var i = 0; i < basis; i++)
+            {
+                for (var j = 0; j < basis; j++)
+                {
+                    matrix[i, j] = 0;
+                }
+            }
+            for (var i = 0; i < basis; i++)
+            {
+                for (var j = 0; j < basis; j++)
+                {
+                    double sumA = 0, sumB = 0;
+                    for (var k = 0; k < xyTable.GetLength(1); k++)
+                    {
+                        sumA += Math.Pow(xyTable[0, k], i) * Math.Pow(xyTable[0, k], j);
+                        sumB += xyTable[1, k] * Math.Pow(xyTable[0, k], i);
+                    }
+                    matrix[i, j] = sumA;
+                    matrix[i, basis] = sumB;
+                }
+            }
+            return matrix;
+        }
+
+        private static double[] Gauss(double[,] matrix, int rowCount, int colCount)
+        {
+            int i;
+            var mask = new int[colCount - 1];
+            for (i = 0; i < colCount - 1; i++) mask[i] = i;
+            if (GaussDirectPass(ref matrix, ref mask, colCount, rowCount))
+            {
+                double[] answer = GaussReversePass(ref matrix, mask, colCount, rowCount);
+                return answer;
+            }
+            else return null;
+        }
+        private static bool GaussDirectPass(ref double[,] matrix, ref int[] mask,
+            int colCount, int rowCount)
+        {
+            int i, j, k, maxId, tmpInt;
+            double maxVal, tempDouble;
+            for (i = 0; i < rowCount; i++)
+            {
+                maxId = i;
+                maxVal = matrix[i, i];
+                for (j = i + 1; j < colCount - 1; j++)
+                    if (Math.Abs(maxVal) < Math.Abs(matrix[i, j]))
+                    {
+                        maxVal = matrix[i, j];
+                        maxId = j;
+                    }
+                if (maxVal == 0) return false;
+                if (i != maxId)
+                {
+                    for (j = 0; j < rowCount; j++)
+                    {
+                        tempDouble = matrix[j, i];
+                        matrix[j, i] = matrix[j, maxId];
+                        matrix[j, maxId] = tempDouble;
+                    }
+                    tmpInt = mask[i];
+                    mask[i] = mask[maxId];
+                    mask[maxId] = tmpInt;
+                }
+                for (j = 0; j < colCount; j++) matrix[i, j] /= maxVal;
+                for (j = i + 1; j < rowCount; j++)
+                {
+                    double tempMn = matrix[j, i];
+                    for (k = 0; k < colCount; k++)
+                        matrix[j, k] -= matrix[i, k] * tempMn;
+                }
+            }
+            return true;
+        }
+
+        private static double[] GaussReversePass(ref double[,] matrix, int[] mask,
+            int colCount, int rowCount)
+        {
+            int i, j, k;
+            for (i = rowCount - 1; i >= 0; i--)
+                for (j = i - 1; j >= 0; j--)
+                {
+                    double tempMn = matrix[j, i];
+                    for (k = 0; k < colCount; k++)
+                        matrix[j, k] -= matrix[i, k] * tempMn;
+                }
+            double[] answer = new double[rowCount];
+            for (i = 0; i < rowCount; i++) answer[mask[i]] = matrix[i, colCount - 1];
+            return answer;
+        }
+
+        #endregion
 
         #endregion
 
