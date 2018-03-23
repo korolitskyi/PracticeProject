@@ -1,151 +1,46 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 
 namespace Test
 {
     internal static class Program
     {
+
         private static void Main(string[] args)
         {
-            var points = new[,]
-            {
-                //{20.9655, 58.4901  },
-                //{21.7087, 69.5809  },
-                //{22.0723, 67.222  },
-                //{22.3847, 77.83952 },
-                //{22.641 , 78.66343 },
-                //{23.1175, 99.37954 }
-                {41, 57},
-                {41.9, 66},
-                {42.5, 76},
-                {45.7, 92},
-                {47.2, 88},
-                {48, 79}
-            };
+            //NelderMead();
+            //GaussNewton();
 
-            //var a = points[0, 1] / Math.Exp(-Math.Pow(points[0, 0] - start[1], 2) / (2 * Math.Pow(start[2], 2));
-            //var b = 
-
-            var start = new double[] { 2.5, .3, 2.5 };
-
-
-            //var start = new[] { 6, .3 };
-
-            //var points = new[,]
-            //{
-            //    {1, 8.3  }, //1815
-            //    {2, 11.0 }, //1825
-            //    {3, 14.7 }, //1835
-            //    {4, 19.7 }, //1845
-            //    {5, 26.7 }, //1855
-            //    {6, 35.2 }, //1865
-            //    {7, 44.4 }, //1875
-            //    {8, 55.9 }  //1885
-            //};
-
-            //var start = new[] { 2.5, .25 };
-
-            //var points = new[,]
-            //{
-            //    {1, 3.2939 },
-            //    {2, 4.2699 },
-            //    {4, 7.1749 },
-            //    {5, 9.3008 },
-            //    {8, 20.259 }
-            //};
-
-
-            for (var z = 0; z < 10; z++)
-            {
-
-                var J = new double[points.GetLength(0), start.Length];
-                var df = new double[start.Length];
-                var dF = new double[start.Length, start.Length];
-
-
-                for (var j = 0; j < points.GetLength(0); j++)
-                {
-                    //    J[j, 0] = Math.Exp(start[1] * points[j, 0]);
-                    //    J[j, 1] = points[j, 0] * start[0] * Math.Exp(start[1] * points[j, 0]);
-                    J[j, 0] = Math.Exp(-Math.Pow(points[j, 0] - start[1], 2) / (2 * Math.Pow(start[2], 2)));
-                    J[j, 1] = start[0] * (points[j, 0] - start[1]) * Math.Exp(-Math.Pow(points[j, 0] - start[1], 2) / (2 * Math.Pow(start[2], 2))) / Math.Pow(start[2], 2);
-                    J[j, 2] = start[0] * Math.Pow(points[j, 0] - start[1], 2) * Math.Exp(-Math.Pow(points[j, 0] - start[1], 2) / (2 * Math.Pow(start[2], 2))) / Math.Pow(start[2], 3);
-                }
-
-
-                //r * J
-                for (var i = 0; i < start.Length; i++)
-                {
-                    for (var j = 0; j < points.GetLength(0); j++)
-                    {
-                        //df[i] += (start[0] * Math.Exp(start[1] * points[j, 0]) - points[j, 1]) * J[j, i];
-                        df[i] += (start[0] * Math.Exp(-Math.Pow(points[j, 0] - start[1], 2) / (2 * Math.Pow(start[2], 2))) - points[j, 1]) * J[j, i];
-                    }
-                }
-
-                //J*Jt
-                for (var i = 0; i < start.Length; i++)
-                {
-                    for (var j = 0; j < start.Length; j++)
-                    {
-                        for (var k = 0; k < points.GetLength(0); k++)
-                        {
-                            dF[i, j] += J[k, i] * J[k, j];
-                        }
-                    }
-                }
-
-
-                var ndF = Inverse(dF);
-
-                var ndf = new double[1, df.Length];
-                for (var i = 0; i < df.Length; i++)
-                    ndf[0, i] = df[i];
-
-
-
-                var p = MultiplyTwoMatrices(ndf, ndF);
-
-                for (var i = 0; i < p.GetLength(0); i++)
-                {
-                    for (var j = 0; j < p.GetLength(1); j++)
-                    {
-                        p[i, j] = p[i, j] * -1;
-                    }
-                }
-
-                start[0] += p[0, 0];
-                start[1] += p[0, 1];
-                start[2] += p[0, 2];
-
-
-                //Console.WriteLine("r:");
-                //foreach (var e in r)
-                //    Console.WriteLine(e);
-
-                //Console.WriteLine("\nJ:");
-                //for (int i = 0; i < xy.GetLength(0); i++)
-                //    Console.WriteLine($"{J[i, 0]} {J[i, 1]}");
-
-                //Console.WriteLine($"\ndf:\n{df[0]} \n{df[1]}");
-
-                //Console.WriteLine($"\nDf:\n{dF[0, 0]} {dF[0, 1]} \n{dF[1, 0]} {dF[1, 1]}");
-
-                //Console.WriteLine($"\n{D}");
-
-                //Console.WriteLine($"\nDf -1:\n{dF[0, 0]} {dF[0, 1]} \n{dF[1, 0]} {dF[1, 1]}");
-
-                Console.WriteLine($"\np:\n{p[0, 0]} \n{p[0, 1]} \n{p[0, 2]}");
-            }
-
-            Console.WriteLine($"\nx1: {start[0]}, x2: {start[1]}, x3: {start[2]}");
 
             Console.ReadKey();
         }
 
+        static double[] RayToRayIntersection(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4)
+        {
+            double[] result = null;
+            //Make sure the lines aren't parallel
+            if ((y2 - y1) / (x2 - x1) != (y4 - y3) / (x4 - x3))
+            {
+                //check if one ray contains another one
+                var d = (x2 - x1) * (y4 - y3) - (y2 - y1) * (x4 - x3);
+                if (d != 0)
+                {
+                    var r = ((y1 - y3) * (x4 - x3) - (x1 - x3) * (y4 - y3)) / d;
+                    var s = ((y1 - y3) * (x2 - x1) - (x1 - x3) * (y2 - y1)) / d;
+                    if (r >= 0)
+                    {
+                        if (s >= 0)
+                        {
+                            result = new[] { x1 + r * (x2 - x1), y1 + r * (y2 - y1) };
+                        }
+                    }
+                }
+            }
+            return result;
+        }
+
+        #region GaussNewton
         static double[,] MultiplyTwoMatrices(double[,] left, double[,] right)
         {
             //test
@@ -304,136 +199,413 @@ namespace Test
 
         static void GaussNewton()
         {
-            //var start = new[] { 6, .3 };
-
-            //var xy = new[,]
-            //{
-            //    {1815, 8.3  },
-            //    {1825, 11.0 },
-            //    {1835, 14.7 },
-            //    {1845, 19.7 },
-            //    {1855, 26.7 },
-            //    {1865, 35.2 },
-            //    {1875, 44.4 },
-            //    {1885, 55.9 }
-            //};
-
-            var start = new[] { 2.5, .25 };
-
-            var xy = new[,]
+            var points = new[,]
             {
-                {1, 3.2939 },
-                {2, 4.2699 },
-                {3, 7.1749 },
-                {4, 9.3008 },
-                {8, 20.259 }
+                //{20.9655, 58.4901  },
+                //{21.7087, 69.5809  },
+                //{22.0723, 67.222  },
+                //{22.3847, 77.83952 },
+                //{22.641 , 78.66343 },
+                //{23.1175, 99.37954 }
+                {20.736 , 58.4901},
+                {21.4792, 69.5809},
+                {21.8428, 67.222 },
+                {22.1552, 77.8395},
+                {22.4115, 78.6634},
+                {22.888 , 99.3795}
+
+
+
+
+
+
+
+
             };
 
+            //var a = points[0, 1] / Math.Exp(-Math.Pow(points[0, 0] - start[1], 2) / (2 * Math.Pow(start[2], 2));
+            //var b = 
 
-            var r = new double[xy.GetLength(0)];
-            var J = new double[xy.GetLength(0), xy.GetLength(1)];
+            var start = new double[] { 130, 10, 50 };
 
-            for (var i = 0; i < xy.GetLength(0); i++)
-                r[i] = start[0] * Math.Exp(start[1] * (i + 1)) - xy[i, 1];
+            //var start = new[] { 6, .3 };
 
-            for (var i = 0; i < xy.GetLength(0); i++)
+            //var points = new[,]
+            //{
+            //    {1, 8.3  }, //1815
+            //    {2, 11.0 }, //1825
+            //    {3, 14.7 }, //1835
+            //    {4, 19.7 }, //1845
+            //    {5, 26.7 }, //1855
+            //    {6, 35.2 }, //1865
+            //    {7, 44.4 }, //1875
+            //    {8, 55.9 }  //1885
+            //};
+
+            //var start = new[] { 2.5, .25 };
+
+            //var points = new[,]
+            //{
+            //    {1, 3.2939 },
+            //    {2, 4.2699 },
+            //    {4, 7.1749 },
+            //    {5, 9.3008 },
+            //    {8, 20.259 }
+            //};
+
+
+            for (var z = 0; z < 10; z++)
             {
-                J[i, 0] = Math.Exp(start[1] * (i + 1));
-                J[i, 1] = (i + 1) * start[0] * Math.Exp(start[1] * (i + 1));
 
+                var J = new double[points.GetLength(0), start.Length];
+                var df = new double[start.Length];
+                var dF = new double[start.Length, start.Length];
+
+
+                for (var j = 0; j < points.GetLength(0); j++)
+                {
+                    //    J[j, 0] = Math.Exp(start[1] * points[j, 0]);
+                    //    J[j, 1] = points[j, 0] * start[0] * Math.Exp(start[1] * points[j, 0]);
+                    J[j, 0] = Math.Exp(-Math.Pow(points[j, 0] - start[1], 2) / (2 * Math.Pow(start[2], 2)));
+                    J[j, 1] = start[0] * (points[j, 0] - start[1]) * Math.Exp(-Math.Pow(points[j, 0] - start[1], 2) / (2 * Math.Pow(start[2], 2))) / Math.Pow(start[2], 2);
+                    J[j, 2] = start[0] * Math.Pow(points[j, 0] - start[1], 2) * Math.Exp(-Math.Pow(points[j, 0] - start[1], 2) / (2 * Math.Pow(start[2], 2))) / Math.Pow(start[2], 3);
+                }
+
+
+                //r * J
+                for (var i = 0; i < start.Length; i++)
+                {
+                    for (var j = 0; j < points.GetLength(0); j++)
+                    {
+                        //df[i] += (start[0] * Math.Exp(start[1] * points[j, 0]) - points[j, 1]) * J[j, i];
+                        df[i] += (start[0] * Math.Exp(-Math.Pow(points[j, 0] - start[1], 2) / (2 * Math.Pow(start[2], 2))) - points[j, 1]) * J[j, i];
+                    }
+                }
+
+                //J*Jt
+                for (var i = 0; i < start.Length; i++)
+                {
+                    for (var j = 0; j < start.Length; j++)
+                    {
+                        for (var k = 0; k < points.GetLength(0); k++)
+                        {
+                            dF[i, j] += J[k, i] * J[k, j];
+                        }
+                    }
+                }
+
+
+                var ndF = Inverse(dF);
+
+                var ndf = new double[1, df.Length];
+                for (var i = 0; i < df.Length; i++)
+                    ndf[0, i] = df[i];
+
+
+
+                var p = MultiplyTwoMatrices(ndf, ndF);
+
+                for (var i = 0; i < p.GetLength(0); i++)
+                {
+                    for (var j = 0; j < p.GetLength(1); j++)
+                    {
+                        p[i, j] = p[i, j] * -1;
+                    }
+                }
+
+                start[0] += p[0, 0];
+                start[1] += p[0, 1];
+                start[2] += p[0, 2];
+
+
+                //Console.WriteLine("r:");
+                //foreach (var e in r)
+                //    Console.WriteLine(e);
+
+                //Console.WriteLine("\nJ:");
+                //for (int i = 0; i < xy.GetLength(0); i++)
+                //    Console.WriteLine($"{J[i, 0]} {J[i, 1]}");
+
+                //Console.WriteLine($"\ndf:\n{df[0]} \n{df[1]}");
+
+                //Console.WriteLine($"\nDf:\n{dF[0, 0]} {dF[0, 1]} \n{dF[1, 0]} {dF[1, 1]}");
+
+                //Console.WriteLine($"\n{D}");
+
+                //Console.WriteLine($"\nDf -1:\n{dF[0, 0]} {dF[0, 1]} \n{dF[1, 0]} {dF[1, 1]}");
+
+                Console.WriteLine($"\np:\n{p[0, 0]} \n{p[0, 1]} \n{p[0, 2]}");
             }
 
-
-
-            Console.WriteLine("r:");
-
-            foreach (var e in r)
-                Console.WriteLine(e);
-
-            Console.WriteLine("\np:");
-
-            for (int i = 0; i < xy.GetLength(0); i++)
-                Console.WriteLine("{0} {1}", J[i, 0], J[i, 1]);
+            Console.WriteLine($"\nx1: {start[0]}, x2: {start[1]}, x3: {start[2]}");
         }
+        #endregion
 
-        static void NelderMead(double[] xs, double[] ys)
+        #region NelderMead
+
+        static void NelderMead()
         {
+            var xArr = new[]
+            {
+                20.736,
+                21.4792,
+                21.8428,
+                22.1552,
+                22.4115,
+                22.888
+            };
 
-            //double[] wd1 = { 20.9655, 21.7087, 22.0723, 22.3847, 22.641, 23.1175 };
-            //double[] pc1 = { 58.4901, 69.5809, 67.222, 77.83952, 78.66343, 99.37954 };
+            var yArr = new[]
+            {
+                58.4901,
+                69.5809,
+                67.222,
+                77.8395,
+                78.6634,
+                99.3795
+            };
 
-            //var init = new[] { pc1.Sum(), 10, 50 };
-
-            //var count = 0;
-
-
-            //Func<double[], double> function = x =>
+            //var xArr = new[]
             //{
-            //    var INTA = new double[6];
-            //    var SE = new double[6];
+            //    20.447033333333355, 20.58946666666668, 20.7040166666667, 20.73911666666669, 20.74963333333336, 20.764100000000013, 20.78283333333336, 20.896600000000017, 20.951166666666683, 21.021033333333367, 21.231250000000035, 21.37080000000003, 21.491583333333363, 21.60235000000004, 21.624016666666694, 21.648000000000014, 21.66145000000002, 21.66238333333335, 21.701683333333364, 21.738666666666678, 21.788983333333363, 21.78998333333335, 21.86003333333336, 21.864400000000035, 21.88915000000002, 21.969516666666703, 21.982566666666685, 22.022350000000035, 22.092783333333358, 22.10813333333336, 22.13315000000004, 22.148666666666685, 22.19646666666668, 22.209450000000015, 22.22238333333337, 22.263300000000026, 22.28383333333336, 22.332983333333363, 22.396016666666707, 22.410283333333364, 22.425400000000035, 22.429650000000038, 22.42996666666669, 22.492833333333362, 22.50273333333335, 22.531383333333377, 22.60768333333336, 22.636666666666695, 22.6410666666667, 22.669733333333358, 22.776500000000016, 23.01585000000003, 23.27570000000004, 23.2874166666667, 23.438050000000022
 
-
-            //    for (int i = 0; i < 6; i++)
-            //    {
-            //        INTA[i] = x[0] / (Math.Sqrt(2 * Math.PI) * x[1]) * Math.Exp(-.5 * (Math.Pow(x[2] - wd1[i], 2)) / Math.Pow((x[1]), 2));
-            //        SE[i] = Math.Pow(INTA[i] - pc1[i], 2);
-            //    }
-            //    count++;
-            //    return SE.Sum();
             //};
-            ////10.0 * Math.Pow(x[0] + 1.0, 2.0) + Math.Pow(x[1], 2.0);
 
-            //int start = 500;
-
-            //for (int i = 0; i < 3000; i++)
+            //var yArr = new[]
             //{
-            //    count = 0;
+            //    56.37502813833333, 53.979675568333334, 59.16982437833334, 69.07064508999999, 47.77055989166667, 63.859874311666665, 48.03523120833333, 68.94516784833333, 59.205059258333335, 66.58070750333333, 66.84528614833334, 71.55579227666665, 63.200036278333336, 69.34531049833335, 80.265006305, 79.19473872500001, 59.79527651666667, 69.445797715, 75.34006061833334, 68.78536942666666, 63.98488665333333, 81.63013178666667, 52.74558865833333, 80.39029655333333, 48.120545926666665, 64.13012582833333, 69.87078046166667, 85.13980555666666, 71.59532469166668, 59.225762929999995, 75.77495391, 99.03917272833333, 99.41423073833333, 82.43547798666667, 68.28980122666665, 59.64054013500001, 103.77423143833333, 74.54069882166668, 73.78552346, 85.85464785166666, 68.48005160999999, 69.56023144, 74.27061566500002, 69.75029025833334, 87.95458138500003, 88.53143736666668, 74.88534976833334, 102.369314035, 91.84477669666667, 116.77433659500001, 99.89053493833335, 100.50623381166666, 103.115894615, 108.44627956166669, 107.43088516166665
 
-            //    // We can do so using the NelderMead class:
-            //    var solver = new NelderMead(numberOfVariables: 3)
-            //    {
-            //        Convergence = new GeneralConvergence(3)
-            //        {//
-            //            Evaluations = start,//500
-            //            RelativeParameterTolerance = 1e-8,
+            //};
 
-            //            MaximumEvaluations = 500 + i//1350
-            //        },
+            var init = new double[] { yArr.Sum(), 10, 50 };
 
-            //        Function = function, // f(x) = 10 * (x+1)^2 + y^2
-            //                             // DiameterTolerance = 1e-8,
+            var step = 0;
 
-            //    };
+            Func<double[], double> function = constants =>
+            {
+                //Console.Write("Called with a={0} b={1} c={2}", constants[0], constants[1], constants[2]);
 
-            //    //start = i;
-            //    // Now, we can minimize it with:
-            //    bool success = solver.Minimize(init);
+                double se = 0;
 
-            //    // And get the solution vector using
-            //    double[] solution = solver.Solution; // should be (-1, 1)
+                for (int i = 0, len = xArr.Length; i < len; i++)
+                {
+                    var yRegress = constants[0] / (Math.Sqrt(2 * Math.PI) * constants[1]) * Math.Exp(-.5 * (Math.Pow(constants[2] - xArr[i], 2)) / Math.Pow((constants[1]), 2));
+                    se += Math.Pow(yRegress - yArr[i], 2);
+                }
 
-            //    // The minimum at this location would be:
-            //    //double minimum = solver.Value; // should be 0
+                //Console.WriteLine("  Summ={0}", se);
+                //Console.WriteLine(step++);
+                return se;
+            };
 
-            //    if (solution[0] < 39000 && solution[0] > 36000)
-            //    {
-            //        foreach (var s in solution)
-            //            Console.WriteLine(s);
+            var simplex = new Simplex
+            {
+                Arr = init,
+                fx = function(init),
+                id = 0
+            };
 
-            //        Console.WriteLine(count);
-            //        Console.WriteLine();
+            var date = DateTime.Now;
 
-            //    }
-            //}
+            var result = nelderMead(function, simplex);
 
+            Console.WriteLine((DateTime.Now - date).Milliseconds);
+
+            foreach (var e in result)
+            {
+                Console.WriteLine(e);
+            }
 
 
             //Console.ForegroundColor = ConsoleColor.Green;
 
-            //Console.WriteLine("Expected results: \n37483,00782 \n10,02566533 \n46,70633539");
-
-
+            //Console.WriteLine("Expected results: \n40838.5582 \n47.1331 \n10.1734");
         }
+
+
+
+        public static void UpdateSimplex(Simplex[] simplex, Simplex value, int N)
+        {
+            for (var i = 0; i < value.Arr.Length; i++)
+            {
+                simplex[N].Arr[i] = value.Arr[i];
+            }
+            simplex[N].fx = value.fx;
+        }
+
+        public static void weightedSum(double[] ret, double w1, double[] v1, double w2, Simplex v2)
+        {
+            for (var j = 0; j < ret.Length; ++j)
+            {
+                ret[j] = w1 * v1[j] + w2 * v2.Arr[j];
+            }
+        }
+
+        public class Simplex
+        {
+            public double[] Arr { get; set; }
+            public double fx { get; set; }
+            public double id { get; set; }
+            public Simplex()
+            { }
+
+            public Simplex(Simplex s)
+            {
+                Arr = s.Arr.Clone() as double[];
+                fx = s.fx;
+                id = s.id;
+            }
+        }
+
+        public static double[] nelderMead(Func<double[], double> f, Simplex x0)
+        {
+            const int maxIterations = 500;
+            const double nonZeroDelta = 1.05;
+            const double minErrorDelta = 1e-8;
+            const double minTolerance = 1e-5;
+            const int rho = 1;
+            const int chi = 2;
+            const double psi = -0.5;
+            const double sigma = 0.5;
+
+            // initialize simplex.
+            var n = x0.Arr.Length;
+            var simplex = new Simplex[n + 1];
+
+
+            simplex[0] = new Simplex
+            {
+                Arr = x0.Arr,
+                fx = f(x0.Arr),
+                id = 0
+            };
+
+            for (var i = 0; i < n; ++i)
+            {
+                var point = x0.Arr.Clone() as double[];
+
+                point[i] = point[i] * nonZeroDelta;
+
+                simplex[i + 1] = new Simplex
+                {
+                    Arr = point,
+                    fx = f(point),
+                    id = i + 1
+                };
+            }
+
+            var centroid =  x0.Arr.Clone() as double[];
+            var reflected = new Simplex(x0);
+            var contracted = new Simplex(x0);
+            var expanded = new Simplex(x0);
+
+            for (var iteration = 0; iteration < maxIterations; ++iteration)
+            {
+                simplex = simplex.OrderBy(e => e.fx).ToArray();
+
+                double maxDiff = 0;
+                for (var i = 0; i < n; ++i)
+                {
+                    maxDiff = Math.Max(maxDiff, Math.Abs(simplex[0].Arr[i] - simplex[1].Arr[i]));
+                }
+
+                if ((Math.Abs(simplex[0].fx - simplex[n].fx) < minErrorDelta) &&
+                    (maxDiff < minTolerance))
+                {
+                    break;
+                }
+
+                // compute the centroid of all but the worst point in the simplex
+                for (var i = 0; i < n; ++i)
+                {
+                    centroid[i] = 0;
+                    for (var j = 0; j < n; ++j)
+                    {
+                        centroid[i] += simplex[j].Arr[i];
+                    }
+                    centroid[i] /= n;
+                }
+
+                // reflect the worst point past the centroid  and compute loss at reflected
+                // point
+                var worst = new Simplex(simplex[n]);
+                weightedSum(reflected.Arr, 1 + rho, centroid, -rho, worst);
+                reflected.fx = f(reflected.Arr);
+
+                // if the reflected point is the best seen, then possibly expand
+                if (reflected.fx < simplex[0].fx)
+                {
+                    weightedSum(expanded.Arr, 1 + chi, centroid, -chi, worst);
+                    expanded.fx = f(expanded.Arr);
+                    if (expanded.fx < reflected.fx)
+                    {
+                        UpdateSimplex(simplex, expanded, n);
+                    }
+                    else
+                    {
+                        UpdateSimplex(simplex, reflected, n);
+                    }
+                }
+
+                // if the reflected point is worse than the second worst, we need to
+                // contract
+                else if (reflected.fx >= simplex[n - 1].fx)
+                {
+                    var shouldReduce = false;
+
+                    if (reflected.fx > worst.fx)
+                    {
+                        // do an inside contraction
+                        weightedSum(contracted.Arr, 1 + psi, centroid, -psi, worst);
+                        contracted.fx = f(contracted.Arr);
+                        if (contracted.fx < worst.fx)
+                        {
+                            UpdateSimplex(simplex, contracted, n);
+                        }
+                        else
+                        {
+                            shouldReduce = true;
+                        }
+                    }
+                    else
+                    {
+                        // do an outside contraction
+                        weightedSum(contracted.Arr, 1 - psi * rho, centroid, psi * rho, worst);
+                        contracted.fx = f(contracted.Arr);
+                        if (contracted.fx < reflected.fx)
+                        {
+                            UpdateSimplex(simplex, contracted, n);
+                        }
+                        else
+                        {
+                            shouldReduce = true;
+                        }
+                    }
+
+                    if (shouldReduce)
+                    {
+                        // if we don't contract here, we're done
+                        if (sigma >= 1) break;
+
+                        // do a reduction
+                        for (var i = 1; i < simplex.Length; ++i)
+                        {
+                            weightedSum(simplex[i].Arr, 1 - sigma, simplex[0].Arr, sigma, simplex[i]);
+                            simplex[i].fx = f(simplex[i].Arr);
+                        }
+                    }
+                }
+                else
+                {
+                    UpdateSimplex(simplex, reflected, n);
+                }
+            }
+
+            simplex = simplex.OrderBy(e => e.fx).ToArray();
+            return simplex[0].Arr;
+        }
+
+        #endregion
 
         static void Write()
         {
@@ -443,13 +615,13 @@ namespace Test
             }
         }
 
-        //var res = FindAngle(x1, y1, x2, y2, x3, y3) * 180 / Math.PI; //(x2,y2) center point
+        //var res = FindAngle(x1, y1, x2, y2, x3, y3) * 180 / Math.PI; //(x2,y2) vertex point
         static double FindAngle(double x1, double y1, double x2, double y2, double x3, double y3)
         {
             return Math.Atan2(y1 - y2, x1 - x2) - Math.Atan2(y3 - y2, x3 - x2);
         }
 
-        static double FindLength(double x1, double y1, double x2, double y2)
+        static double FindLengthBtwPoints(double x1, double y1, double x2, double y2)
         {
             return Math.Sqrt(Math.Pow(x1 - x2, 2) + Math.Pow(y1 - y2, 2));
         }
