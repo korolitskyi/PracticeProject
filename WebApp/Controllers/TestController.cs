@@ -5,8 +5,8 @@ namespace WebApp.Controllers
 {
     public class TestModel
     {
-        [JsonProperty("dvalue")]
-        public int DValue { get; set; }
+        [JsonProperty("number")]
+        public int Number { get; set; }
     }
 
 
@@ -18,6 +18,7 @@ namespace WebApp.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest();
+
             return Ok();
         }
     }
