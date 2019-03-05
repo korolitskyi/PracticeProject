@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -13,8 +14,107 @@ namespace Test
             //NelderMead();
             //GaussNewton();
 
+
+            TestMethods();
+
+            //var test = 1077265548;
+            //var t = OurGetByteSize(test);
+
             Console.ReadKey();
         }
+
+        static void TestMethods()
+        {
+            var random = new Random();
+            var stopWatch = new Stopwatch();
+
+            var testNumbers = new int[100000];
+
+            for (int i = 0; i < testNumbers.Length; i++)
+            {
+                testNumbers[i] = random.Next(int.MinValue, int.MaxValue);
+            }
+
+            stopWatch.Start();
+
+            for (int i = 0; i < testNumbers.Length; i++)
+            {
+                var firstVal = GetByteSize(testNumbers[i]);
+                var secondVal = OurGetByteSize(testNumbers[i]);
+
+                if(firstVal != secondVal)
+                    Console.WriteLine("{0} and {1} are not equal for {2} butes", firstVal, secondVal, testNumbers[i]);
+            }
+
+            stopWatch.Stop();
+            Console.WriteLine("Init duration = " + stopWatch.Elapsed);
+
+
+            stopWatch.Restart();
+
+            for (int i = 0; i < testNumbers.Length; i++)
+            {
+                GetByteSize(testNumbers[i]);
+            }
+
+            stopWatch.Stop();
+            Console.WriteLine("first variant duration = " + stopWatch.Elapsed);
+
+            stopWatch.Restart();
+
+            for (int i = 0; i < testNumbers.Length; i++)
+            {
+                GetByteSize(testNumbers[i]);
+            }
+
+            stopWatch.Stop();
+            Console.WriteLine("second variant duration = " + stopWatch.Elapsed);
+        }
+
+        static string GetByteSize(int byteCount, int decimals = 2, int @base = 1024)
+        {
+            string[] suf = { "B", "KB", "MB", "GB", "TB", "PB", "EB" }; //Longs run out around EB
+            if (byteCount == 0)
+                return "0" + suf[0];
+            long bytes = Math.Abs(byteCount);
+            int place = Convert.ToInt32(Math.Floor(Math.Log(bytes, @base)));
+
+
+            double mantissa = Math.Pow(10, decimals);
+            double num = Math.Truncate(bytes / Math.Pow(1024, place) * mantissa) / mantissa;
+
+            //double num = Math.Round(bytes / Math.Pow(1024, place), decimals);
+            return (Math.Sign(byteCount) * num).ToString() + " " + suf[place];
+        }
+
+        static string OurGetByteSize(long fileSize, int decimals = 2, int @base = 1024)
+        {
+            string[] prefixes = new string[] { "B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
+
+            if (fileSize == 0)
+                return "0 " + prefixes[0];
+
+            double prevResult = 0;
+            double mantissa = Math.Pow(10, decimals);
+
+            
+            for (int i = 0; i < prefixes.Length; i++)
+            {
+                double multiplier = Math.Pow(@base, i);
+                double result = fileSize / multiplier;
+                result = Math.Truncate(result * mantissa) / mantissa;
+                 
+                if (Math.Abs(result) < 1)
+                    return string.Format("{0} {1}", prevResult, prefixes[i - 1]);
+
+                prevResult = result;
+            }
+
+            return fileSize.ToString();
+        }
+
+
+
 
         static double[] RayToRayIntersection(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4)
         {
