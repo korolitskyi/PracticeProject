@@ -15,10 +15,18 @@ namespace Test
             //GaussNewton();
 
 
-            TestMethods();
+            //TestMethods();
 
-            //var test = 1077265548;
-            //var t = OurGetByteSize(test);
+            while (true)
+            {
+                int result = 0;
+                var isSuccess = int.TryParse(Console.ReadLine(), out result);
+                var t = OurGetByteSize(result);
+                if(isSuccess)
+                    Console.WriteLine(t);
+            }
+
+            
 
             Console.ReadKey();
         }
