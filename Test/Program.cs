@@ -15,23 +15,22 @@ namespace Test
             //GaussNewton();
 
 
-            //TestMethods();
+            //CompareByteSizeMethods();
 
             while (true)
             {
                 int result = 0;
                 var isSuccess = int.TryParse(Console.ReadLine(), out result);
                 var t = OurGetByteSize(result);
-                if(isSuccess)
+                if (isSuccess)
                     Console.WriteLine(t);
             }
 
-            
 
             Console.ReadKey();
         }
 
-        static void TestMethods()
+        static void CompareByteSizeMethods()
         {
             var random = new Random();
             var stopWatch = new Stopwatch();
@@ -55,7 +54,7 @@ namespace Test
             }
 
             stopWatch.Stop();
-            Console.WriteLine("Init duration = " + stopWatch.Elapsed);
+            Console.WriteLine("Init duration = " + stopWatch.ElapsedTicks);
 
 
             stopWatch.Restart();
@@ -66,7 +65,7 @@ namespace Test
             }
 
             stopWatch.Stop();
-            Console.WriteLine("first variant duration = " + stopWatch.Elapsed);
+            Console.WriteLine("first variant duration = " + stopWatch.ElapsedTicks);
 
             stopWatch.Restart();
 
@@ -76,7 +75,7 @@ namespace Test
             }
 
             stopWatch.Stop();
-            Console.WriteLine("second variant duration = " + stopWatch.Elapsed);
+            Console.WriteLine("second variant duration = " + stopWatch.ElapsedTicks);
         }
 
         static string GetByteSize(int byteCount, int decimals = 2, int @base = 1024)
@@ -95,7 +94,7 @@ namespace Test
             return (Math.Sign(byteCount) * num).ToString() + " " + suf[place];
         }
 
-        static string OurGetByteSize(long fileSize, int decimals = 2, int @base = 1024)
+        static string OurGetByteSize(long fileSize, int decimals = 2, int baseNumber = 1024)
         {
             string[] prefixes = new string[] { "B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
 
@@ -108,7 +107,7 @@ namespace Test
             
             for (int i = 0; i < prefixes.Length; i++)
             {
-                double multiplier = Math.Pow(@base, i);
+                double multiplier = Math.Pow(baseNumber, i);
                 double result = fileSize / multiplier;
                 result = Math.Truncate(result * mantissa) / mantissa;
                  
