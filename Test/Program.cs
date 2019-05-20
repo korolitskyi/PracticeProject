@@ -16,18 +16,22 @@ namespace Test
 
 
             //CompareByteSizeMethods();
+            TestByteSizeMethod();
 
-            while (true)
-            {
-                int result = 0;
-                var isSuccess = int.TryParse(Console.ReadLine(), out result);
-                var t = OurGetByteSize(result);
-                if (isSuccess)
-                    Console.WriteLine(t);
-            }
 
 
             Console.ReadKey();
+        }
+
+        static void TestByteSizeMethod()
+        {
+            while (true)
+            {
+                Console.WriteLine("Enter the value: ");
+                var isSuccess = int.TryParse(Console.ReadLine(), out int result);
+                if (isSuccess)
+                    Console.WriteLine("Result: " + OurGetByteSize(result));
+            }
         }
 
         static void CompareByteSizeMethods()
