@@ -86,7 +86,7 @@ namespace Test
         {
             string[] suf = { "B", "KB", "MB", "GB", "TB", "PB", "EB" }; //Longs run out around EB
             if (byteCount == 0)
-                return "0" + suf[0];
+                return "0 " + suf[0];
             long bytes = Math.Abs(byteCount);
             int place = Convert.ToInt32(Math.Floor(Math.Log(bytes, @base)));
 
