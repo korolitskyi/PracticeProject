@@ -30,7 +30,10 @@ namespace Test
                 Console.WriteLine("Enter the value: ");
                 var isSuccess = int.TryParse(Console.ReadLine(), out int result);
                 if (isSuccess)
-                    Console.WriteLine("Result: " + OurGetByteSize(result));
+                {
+                    Console.WriteLine("humanReadableByteCount Result: " + humanReadableByteCount(result));
+                    Console.WriteLine("OurGetByteSize Result: " + OurGetByteSize(result, 1));
+                }
             }
         }
 
@@ -50,8 +53,8 @@ namespace Test
 
             for (int i = 0; i < testNumbers.Length; i++)
             {
-                var firstVal = GetByteSize(testNumbers[i]);
-                var secondVal = OurGetByteSize(testNumbers[i]);
+                var firstVal = humanReadableByteCount(testNumbers[i]);
+                var secondVal = OurGetByteSize(testNumbers[i], 1);
 
                 if(firstVal != secondVal)
                     Console.WriteLine("{0} and {1} are not equal for {2} butes", firstVal, secondVal, testNumbers[i]);
@@ -65,7 +68,7 @@ namespace Test
 
             for (int i = 0; i < testNumbers.Length; i++)
             {
-                GetByteSize(testNumbers[i]);
+                humanReadableByteCount(testNumbers[i]);
             }
 
             stopWatch.Stop();
@@ -75,7 +78,7 @@ namespace Test
 
             for (int i = 0; i < testNumbers.Length; i++)
             {
-                GetByteSize(testNumbers[i]);
+                OurGetByteSize(testNumbers[i], 1);
             }
 
             stopWatch.Stop();
@@ -92,7 +95,7 @@ namespace Test
 
 
             double mantissa = Math.Pow(10, decimals);
-            double num = Math.Truncate(bytes / Math.Pow(1024, place) * mantissa) / mantissa;
+            double num = Math.Truncate(bytes / Math.Pow(@base, place) * mantissa) / mantissa;
 
             //double num = Math.Round(bytes / Math.Pow(1024, place), decimals);
             return (Math.Sign(byteCount) * num).ToString() + " " + suf[place];
@@ -122,6 +125,23 @@ namespace Test
             }
 
             return fileSize.ToString();
+        }
+
+        public static String humanReadableByteCount(long bytes)
+        {
+            var unit = 1024;
+            var absBytes = bytes == long.MinValue ? long.MaxValue : Math.Abs(bytes);
+            if (absBytes < unit) return bytes + " B";
+            var exp = (int)(Math.Log(absBytes) / Math.Log(unit));
+            var th = (long)(Math.Pow(unit, exp) * (unit - 0.05));
+            if (exp < 6 && absBytes >= th - ((th & 0xfff) == 0xd00 ? 52 : 0)) exp++;
+            var pre = "KMGTPE"[exp - 1].ToString();
+            if (exp > 4)
+            {
+                bytes /= unit;
+                exp -= 1;
+            }
+            return String.Format("{0:0.#} {1}B", bytes / Math.Pow(unit, exp), pre);
         }
 
 
