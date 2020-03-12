@@ -11,9 +11,13 @@ namespace Test
 
         private static void Main(string[] args)
         {
-            var convertor = new HumanReadableByteSizeConvertor();
-            convertor.Test();
+            //var convertor = new HumanReadableByteSizeConvertor();
+            //convertor.Test();
 
+            if (StringEnum.Test1 == "test1")
+            {
+                Console.WriteLine("Horay");
+            }
 
             Console.ReadKey();
         }
